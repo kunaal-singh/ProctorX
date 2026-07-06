@@ -18,6 +18,7 @@ class ActivityLog(db.Model):
     FACE_CAPTURE = "face_capture"
     FACE_VERIFY = "face_verify"
     EXAM_START = "exam_start"
+    EXAM_END = "exam_end"
     EXAM_SUBMIT = "exam_submit"
     EXAM_TERMINATED = "exam_terminated"
     VIOLATION = "violation"

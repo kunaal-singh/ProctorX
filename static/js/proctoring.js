@@ -142,7 +142,8 @@ function showWarningPopup(title, description) {
     const pct = Math.min(100, (warningCount / maxWarnings) * 100);
     document.getElementById('modalProgress').style.width = pct + '%';
 
-    const modal = new bootstrap.Modal(document.getElementById('warningModal'));
+    const modalEl = document.getElementById('warningModal');
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
     modal.show();
 
     // Auto-close after 5 seconds

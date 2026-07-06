@@ -44,6 +44,10 @@ class ViolationService:
             return violation, True, "Violation recorded."
         except Exception as e:
             db.session.rollback()
+            import traceback
+            with open("violation_error.log", "a") as f:
+                f.write(f"ERROR: {str(e)}\n{traceback.format_exc()}\n")
+            print(f"ERROR RECORDING VIOLATION: {str(e)}")
             return None, False, str(e)
 
     @staticmethod
