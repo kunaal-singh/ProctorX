@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Reports — AI Exam Proctor{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <h3 class="fw-bold mb-4">
+        <i class="bi bi-file-earmark-pdf me-2 text-accent"></i>Generated Reports
+    </h3>
+
+    <div class="glass-card p-4">
+        {% if reports %}
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>Score</th>
+                        <th>Result</th>
+                        <th>Violations</th>
+                        <th>Status</th>
+                        <th>Generated</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in reports %}
+                    <tr>
+                        <td>{{ r.id }}</td>
+                        <td>
+                            {% if r.student %}
+                            <span class="text-accent">{{ r.student.student_id }}</span>
+                            <br><small class="text-muted">{{ r.student.full_name }}</small>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>{{ r.exam_score }}/{{ r.total_marks }}</td>
+                        <td>
+                            {% if r.is_passed %}
+                            <span class="badge bg-success">PASSED</span>
+                            {% else %}
+                            <span class="badge bg-danger">FAILED</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if r.total_violations > 10 %}danger{% elif r.total_violations > 5 %}warning text-dark{% else %}secondary{% endif %}">
+                                {{ r.total_violations }}
+                            </span>
+                        </td>
+                        <td>{{ r.exam_status }}</td>
+                        <td class="small text-muted">{{ r.generated_at.strftime('%d %b %Y, %I:%M %p') if r.generated_at else '—' }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.download_report', report_id=r.id) }}"
+                               class="btn btn-sm btn-accent rounded-pill">
+                                <i class="bi bi-download me-1"></i>Download
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-file-earmark-pdf display-3"></i>
+            <p class="mt-2">No reports generated yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

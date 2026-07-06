@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — AI Exam Proctor{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Welcome Header -->
+    <div class="glass-card p-4 mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h3 class="fw-bold mb-1">
+                    <i class="bi bi-hand-wave me-2 text-accent"></i>Welcome, {{ student.full_name }}!
+                </h3>
+                <p class="text-muted mb-0">Student ID: <span class="text-accent fw-medium">{{ student.student_id }}</span></p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                {% if student.is_face_registered %}
+                <span class="badge bg-success px-3 py-2 rounded-pill">
+                    <i class="bi bi-check-circle me-1"></i>Face Registered
+                </span>
+                {% else %}
+                <a href="{{ url_for('student.face_capture') }}" class="btn btn-warning rounded-pill">
+                    <i class="bi bi-camera me-1"></i>Register Your Face
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="glass-card p-4 stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Face Status</p>
+                        <h4 class="fw-bold mb-0">
+                            {% if student.is_face_registered %}
+                            <span class="text-success">Verified</span>
+                            {% else %}
+                            <span class="text-warning">Pending</span>
+                            {% endif %}
+                        </h4>
+                    </div>
+                    <div class="stat-icon bg-accent-subtle">
+                        <i class="bi bi-person-bounding-box text-accent"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-4 stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Available Exams</p>
+                        <h4 class="fw-bold mb-0">{{ exams|length }}</h4>
+                    </div>
+                    <div class="stat-icon bg-info-subtle">
+                        <i class="bi bi-journal-text text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-4 stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Violations</p>
+                        <h4 class="fw-bold mb-0 {% if violations_count > 0 %}text-danger{% endif %}">{{ violations_count }}</h4>
+                    </div>
+                    <div class="stat-icon bg-danger-subtle">
+                        <i class="bi bi-exclamation-triangle text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-4 stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Department</p>
+                        <h4 class="fw-bold mb-0 small">{{ student.department or 'N/A' }}</h4>
+                    </div>
+                    <div class="stat-icon bg-success-subtle">
+                        <i class="bi bi-building text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Available Exams -->
+        <div class="col-lg-7">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-journal-check me-2 text-accent"></i>Available Exams
+                </h5>
+                {% if exams %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Exam</th>
+                                <th>Duration</th>
+                                <th>Total Marks</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exam in exams %}
+                            <tr>
+                                <td>
+                                    <strong>{{ exam.title }}</strong>
+                                    <br><small class="text-muted">{{ exam.description[:60] }}...</small>
+                                </td>
+                                <td>{{ exam.duration_minutes }} min</td>
+                                <td>{{ exam.total_marks }}</td>
+                                <td>
+                                    {% if student.is_face_registered %}
+                                    <a href="{{ url_for('student.face_verify', exam_id=exam.id) }}"
+                                       class="btn btn-sm btn-accent rounded-pill">
+                                        <i class="bi bi-play-circle me-1"></i>Start
+                                    </a>
+                                    {% else %}
+                                    <a href="{{ url_for('student.face_capture') }}"
+                                       class="btn btn-sm btn-warning rounded-pill">
+                                        <i class="bi bi-camera me-1"></i>Register Face
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-inbox display-4"></i>
+                    <p class="mt-2">No exams available at the moment.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-lg-5">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-clock-history me-2 text-info"></i>Recent Activity
+                </h5>
+                {% if activities %}
+                <div class="activity-list">
+                    {% for activity in activities %}
+                    <div class="activity-item d-flex align-items-start mb-3">
+                        <div class="activity-dot me-3 mt-1
+                            {% if activity.activity_type == 'login' %}bg-success
+                            {% elif activity.activity_type == 'violation' %}bg-danger
+                            {% elif activity.activity_type == 'exam_start' %}bg-info
+                            {% else %}bg-secondary{% endif %}">
+                        </div>
+                        <div>
+                            <p class="mb-0 small fw-medium">{{ activity.description or activity.activity_type }}</p>
+                            <small class="text-muted">{{ activity.timestamp.strftime('%d %b %Y, %I:%M %p') }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-clock display-4"></i>
+                    <p class="mt-2">No recent activity.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

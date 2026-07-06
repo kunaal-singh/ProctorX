@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Face Verification — AI Exam Proctor{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="glass-card p-5">
+                <div class="text-center mb-4">
+                    <i class="bi bi-shield-check display-3 text-accent"></i>
+                    <h3 class="fw-bold mt-2">Face Verification</h3>
+                    <p class="text-muted">Verify your identity before starting <strong>{{ exam.title }}</strong></p>
+                </div>
+
+                <!-- Camera Feed -->
+                <div class="camera-container mb-4 position-relative">
+                    <video id="verifyCameraFeed" autoplay playsinline class="w-100 rounded-3"></video>
+                    <canvas id="verifyCanvas" style="display:none;"></canvas>
+                    <div class="face-guide-overlay">
+                        <div class="face-guide-circle"></div>
+                    </div>
+                </div>
+
+                <!-- Verification Result -->
+                <div id="verifyResult" class="text-center mb-4" style="display:none;">
+                    <div id="verifySuccess" style="display:none;">
+                        <i class="bi bi-check-circle-fill display-3 text-success"></i>
+                        <h5 class="text-success mt-2">Face Verified Successfully!</h5>
+                        <p class="text-muted" id="verifyConfidence"></p>
+                        <a href="{{ url_for('student.exam_page', exam_id=exam.id) }}"
+                           class="btn btn-accent btn-lg rounded-pill px-5 mt-2">
+                            <i class="bi bi-play-circle me-2"></i>Start Exam
+                        </a>
+                    </div>
+                    <div id="verifyFailed" style="display:none;">
+                        <i class="bi bi-x-circle-fill display-3 text-danger"></i>
+                        <h5 class="text-danger mt-2">Verification Failed</h5>
+                        <p class="text-muted" id="verifyFailMessage"></p>
+                        <button class="btn btn-warning rounded-pill px-4 mt-2" onclick="retryVerification()">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Try Again
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="text-center" id="verifyControls">
+                    <button id="btnStartVerifyCamera" class="btn btn-accent btn-lg rounded-pill px-5"
+                            onclick="startVerifyCamera()">
+                        <i class="bi bi-camera-video me-2"></i>Start Camera
+                    </button>
+                    <button id="btnVerify" class="btn btn-success btn-lg rounded-pill px-5"
+                            style="display:none;" onclick="verifyFace()">
+                        <i class="bi bi-shield-check me-2"></i>Verify My Face
+                    </button>
+                </div>
+
+                <!-- Loading -->
+                <div id="verifyLoading" class="text-center mt-3" style="display:none;">
+                    <div class="spinner-border text-accent" role="status"></div>
+                    <p class="text-muted mt-2">Verifying your face...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="examId" value="{{ exam.id }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let verifyStream = null;
+
+function startVerifyCamera() {
+    const video = document.getElementById('verifyCameraFeed');
+    navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' } })
+        .then(stream => {
+            verifyStream = stream;
+            video.srcObject = stream;
+            document.getElementById('btnStartVerifyCamera').style.display = 'none';
+            document.getElementById('btnVerify').style.display = 'inline-block';
+        })
+        .catch(err => {
+            alert('Camera access denied. Please allow camera permissions.');
+        });
+}
+
+function verifyFace() {
+    const video = document.getElementById('verifyCameraFeed');
+    const canvas = document.getElementById('verifyCanvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+
+    const imageData = canvas.toDataURL('image/jpeg', 0.9);
+
+    document.getElementById('verifyControls').style.display = 'none';
+    document.getElementById('verifyLoading').style.display = 'block';
+
+    fetch('/student/face-verify/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: imageData })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('verifyLoading').style.display = 'none';
+        document.getElementById('verifyResult').style.display = 'block';
+
+        if (data.success) {
+            document.getElementById('verifySuccess').style.display = 'block';
+            document.getElementById('verifyFailed').style.display = 'none';
+            document.getElementById('verifyConfidence').textContent =
+                `Confidence: ${(data.confidence * 100).toFixed(1)}%`;
+            if (verifyStream) {
+                verifyStream.getTracks().forEach(t => t.stop());
+            }
+        } else {
+            document.getElementById('verifySuccess').style.display = 'none';
+            document.getElementById('verifyFailed').style.display = 'block';
+            document.getElementById('verifyFailMessage').textContent = data.message;
+        }
+    })
+    .catch(err => {
+        document.getElementById('verifyLoading').style.display = 'none';
+        document.getElementById('verifyControls').style.display = 'block';
+        alert('Verification request failed. Please try again.');
+    });
+}
+
+function retryVerification() {
+    document.getElementById('verifyResult').style.display = 'none';
+    document.getElementById('verifySuccess').style.display = 'none';
+    document.getElementById('verifyFailed').style.display = 'none';
+    document.getElementById('verifyControls').style.display = 'block';
+    document.getElementById('btnVerify').style.display = 'inline-block';
+}
+</script>
+{% endblock %}

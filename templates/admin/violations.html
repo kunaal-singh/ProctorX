@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Violations — AI Exam Proctor{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold mb-0">
+            <i class="bi bi-exclamation-triangle me-2 text-danger"></i>Violation Log
+        </h3>
+        <div class="d-flex gap-2 align-items-center">
+            <label class="text-muted small me-2">Filter:</label>
+            <select class="form-select glass-input" style="width: 200px;"
+                    onchange="window.location.href='{{ url_for('admin.violations') }}?type=' + this.value;">
+                <option value="">All Types</option>
+                {% for vtype in violation_types %}
+                <option value="{{ vtype }}" {% if current_filter == vtype %}selected{% endif %}>{{ vtype }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="glass-card p-4">
+        {% if violations %}
+        <div class="table-responsive">
+            <table class="table table-dark table-hover table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>Violation Type</th>
+                        <th>Description</th>
+                        <th>Confidence</th>
+                        <th>Severity</th>
+                        <th>Warning #</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in violations %}
+                    <tr>
+                        <td>{{ v.id }}</td>
+                        <td>
+                            {% if v.student %}
+                            <span class="text-accent">{{ v.student.student_id }}</span>
+                            <br><small class="text-muted">{{ v.student.full_name }}</small>
+                            {% else %}
+                            <span class="text-muted">Unknown</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if v.severity == 'critical' %}danger{% elif v.severity == 'high' %}warning{% elif v.severity == 'low' %}secondary{% else %}info{% endif %}">
+                                {{ v.violation_type }}
+                            </span>
+                        </td>
+                        <td class="small" style="max-width: 200px;">{{ v.description or '—' }}</td>
+                        <td>
+                            {% if v.confidence_score %}
+                            <span class="fw-bold {% if v.confidence_score > 0.8 %}text-danger{% elif v.confidence_score > 0.5 %}text-warning{% else %}text-muted{% endif %}">
+                                {{ '%.0f' % (v.confidence_score * 100) }}%
+                            </span>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if v.severity == 'critical' %}danger{% elif v.severity == 'high' %}warning text-dark{% elif v.severity == 'low' %}secondary{% else %}info{% endif %}">
+                                {{ v.severity }}
+                            </span>
+                        </td>
+                        <td>{{ v.warning_number }}</td>
+                        <td class="small text-muted">{{ v.timestamp.strftime('%d %b, %I:%M:%S %p') if v.timestamp else '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if pagination.pages > 1 %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin.violations', page=pagination.prev_num, type=current_filter) }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if p %}
+                <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin.violations', page=p, type=current_filter) }}">{{ p }}</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+                {% endfor %}
+                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin.violations', page=pagination.next_num, type=current_filter) }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-check-circle display-3 text-success"></i>
+            <p class="mt-2">No violations recorded{% if current_filter %} for "{{ current_filter }}"{% endif %}.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

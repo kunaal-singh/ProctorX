@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% block title %}{{ exam.title }} — AI Exam Proctor{% endblock %}
+
+{% block navbar %}
+<!-- Minimal navbar during exam -->
+<nav class="navbar navbar-dark glass-nav fixed-top py-1">
+    <div class="container-fluid px-4">
+        <span class="navbar-brand fw-bold small">
+            <i class="bi bi-shield-lock-fill me-1 text-accent"></i>{{ exam.title }}
+        </span>
+        <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-dark px-3 py-2" id="examTimer">
+                <i class="bi bi-clock me-1"></i><span id="timerDisplay">{{ exam.duration_minutes }}:00</span>
+            </span>
+            <span class="badge bg-danger px-3 py-2" id="warningBadge">
+                <i class="bi bi-exclamation-triangle me-1"></i>Warnings: <span id="warningCount">0</span>/{{ max_warnings }}
+            </span>
+            <span class="badge bg-info px-2 py-2" id="questionProgress">
+                Q: <span id="currentQ">1</span>/{{ questions|length }}
+            </span>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3" style="margin-top: 60px; margin-bottom: 20px;">
+    <div class="row g-3">
+        <!-- Camera Panel (Left) -->
+        <div class="col-lg-3">
+            <div class="glass-card p-3 position-sticky" style="top: 70px;">
+                <h6 class="fw-bold text-center mb-2">
+                    <i class="bi bi-camera-video-fill me-1 text-accent"></i>Live Monitor
+                </h6>
+                <div class="camera-container-sm position-relative">
+                    <video id="proctoringVideo" autoplay playsinline muted class="w-100 rounded-3"></video>
+                    <canvas id="proctoringCanvas" style="display:none;"></canvas>
+                    <div id="cameraStatus" class="camera-status-dot bg-success" title="Camera Active"></div>
+                </div>
+                <div class="mt-2 text-center">
+                    <small class="text-muted" id="faceStatusText">
+                        <i class="bi bi-check-circle text-success"></i> Face Detected
+                    </small>
+                </div>
+
+                <!-- Warning Progress -->
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">Warning Level</small>
+                        <small class="text-danger fw-bold"><span id="warningPercent">0</span>%</small>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-danger" id="warningProgress" role="progressbar"
+                             style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Proctoring Status -->
+                <div class="mt-3 small">
+                    <div class="d-flex justify-content-between py-1 border-bottom border-secondary">
+                        <span class="text-muted">Face Detection</span>
+                        <span id="statusFace" class="text-success"><i class="bi bi-check-circle-fill"></i></span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom border-secondary">
+                        <span class="text-muted">Head Pose</span>
+                        <span id="statusHead" class="text-success"><i class="bi bi-check-circle-fill"></i></span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom border-secondary">
+                        <span class="text-muted">Eye Gaze</span>
+                        <span id="statusEye" class="text-success"><i class="bi bi-check-circle-fill"></i></span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1">
+                        <span class="text-muted">Browser Focus</span>
+                        <span id="statusBrowser" class="text-success"><i class="bi bi-check-circle-fill"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Questions Panel (Center) -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4">
+                {% for question in questions %}
+                <div class="question-card {% if not loop.first %}d-none{% endif %}" id="question-{{ question.id }}"
+                     data-question-id="{{ question.id }}" data-question-num="{{ loop.index }}">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-accent px-3 py-2">Question {{ loop.index }} of {{ questions|length }}</span>
+                        <span class="badge bg-dark px-3 py-2">{{ question.marks }} marks</span>
+                    </div>
+                    <h5 class="fw-bold mb-4">{{ question.question_text }}</h5>
+
+                    <div class="options-list">
+                        <label class="option-item" for="q{{ question.id }}_a">
+                            <input type="radio" name="answer_{{ question.id }}" value="A"
+                                   id="q{{ question.id }}_a" class="option-radio"
+                                   onchange="saveAnswer({{ question.id }}, 'A')">
+                            <span class="option-label">A</span>
+                            <span class="option-text">{{ question.option_a }}</span>
+                        </label>
+                        <label class="option-item" for="q{{ question.id }}_b">
+                            <input type="radio" name="answer_{{ question.id }}" value="B"
+                                   id="q{{ question.id }}_b" class="option-radio"
+                                   onchange="saveAnswer({{ question.id }}, 'B')">
+                            <span class="option-label">B</span>
+                            <span class="option-text">{{ question.option_b }}</span>
+                        </label>
+                        <label class="option-item" for="q{{ question.id }}_c">
+                            <input type="radio" name="answer_{{ question.id }}" value="C"
+                                   id="q{{ question.id }}_c" class="option-radio"
+                                   onchange="saveAnswer({{ question.id }}, 'C')">
+                            <span class="option-label">C</span>
+                            <span class="option-text">{{ question.option_c }}</span>
+                        </label>
+                        <label class="option-item" for="q{{ question.id }}_d">
+                            <input type="radio" name="answer_{{ question.id }}" value="D"
+                                   id="q{{ question.id }}_d" class="option-radio"
+                                   onchange="saveAnswer({{ question.id }}, 'D')">
+                            <span class="option-label">D</span>
+                            <span class="option-text">{{ question.option_d }}</span>
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Navigation -->
+                <div class="d-flex justify-content-between mt-4">
+                    <button class="btn btn-outline-light rounded-pill px-4" id="btnPrev" onclick="prevQuestion()" disabled>
+                        <i class="bi bi-chevron-left me-1"></i>Previous
+                    </button>
+                    <button class="btn btn-accent rounded-pill px-4" id="btnNext" onclick="nextQuestion()">
+                        Next<i class="bi bi-chevron-right ms-1"></i>
+                    </button>
+                    <button class="btn btn-success rounded-pill px-4 d-none" id="btnSubmit" onclick="submitExam()">
+                        <i class="bi bi-check2-all me-2"></i>Submit Exam
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question Navigator (Right) -->
+        <div class="col-lg-3">
+            <div class="glass-card p-3 position-sticky" style="top: 70px;">
+                <h6 class="fw-bold text-center mb-3">
+                    <i class="bi bi-grid-3x3-gap me-1 text-accent"></i>Question Navigator
+                </h6>
+                <div class="question-nav-grid">
+                    {% for question in questions %}
+                    <button class="q-nav-btn {% if loop.first %}active{% endif %}"
+                            id="qnav-{{ loop.index }}"
+                            onclick="goToQuestion({{ loop.index }})"
+                            data-question-id="{{ question.id }}">
+                        {{ loop.index }}
+                    </button>
+                    {% endfor %}
+                </div>
+                <div class="mt-3 small">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="q-legend-dot bg-accent"></span>
+                        <span class="text-muted">Current</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="q-legend-dot bg-success"></span>
+                        <span class="text-muted">Answered</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="q-legend-dot bg-secondary"></span>
+                        <span class="text-muted">Not Answered</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Warning Modal -->
+<div class="modal fade" id="warningModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-modal border-danger">
+            <div class="modal-body text-center p-4">
+                <i class="bi bi-exclamation-triangle-fill display-3 text-danger mb-3"></i>
+                <h4 class="fw-bold text-danger">⚠️ Warning!</h4>
+                <p class="text-muted" id="warningMessage">A violation has been detected.</p>
+                <p class="small text-muted">Warning <span id="modalWarningNum">0</span> of {{ max_warnings }}</p>
+                <div class="progress mb-3" style="height: 6px;">
+                    <div class="progress-bar bg-danger" id="modalProgress" style="width: 0%"></div>
+                </div>
+                <button class="btn btn-danger rounded-pill px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-check me-1"></i>I Understand
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Termination Modal -->
+<div class="modal fade" id="terminationModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-modal border-danger">
+            <div class="modal-body text-center p-5">
+                <i class="bi bi-x-octagon-fill display-1 text-danger mb-3"></i>
+                <h3 class="fw-bold text-danger">Exam Terminated!</h3>
+                <p class="text-muted">Your exam has been automatically terminated due to exceeding the maximum number of warnings ({{ max_warnings }}).</p>
+                <a href="{{ url_for('student.dashboard') }}" class="btn btn-danger btn-lg rounded-pill px-5 mt-3">
+                    <i class="bi bi-house me-2"></i>Return to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Submission Result Modal -->
+<div class="modal fade" id="resultModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-modal">
+            <div class="modal-body text-center p-5">
+                <div id="resultContent"></div>
+                <a href="{{ url_for('student.dashboard') }}" class="btn btn-accent btn-lg rounded-pill px-5 mt-3">
+                    <i class="bi bi-house me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden Data -->
+<input type="hidden" id="examId" value="{{ exam.id }}">
+<input type="hidden" id="maxWarnings" value="{{ max_warnings }}">
+<input type="hidden" id="examDuration" value="{{ exam.duration_minutes }}">
+<input type="hidden" id="totalQuestions" value="{{ questions|length }}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/proctoring.js') }}"></script>
+{% endblock %}

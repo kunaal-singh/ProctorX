@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Activity Logs — AI Exam Proctor{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold mb-0">
+            <i class="bi bi-journal-text me-2 text-info"></i>Activity Logs
+        </h3>
+        <div class="d-flex gap-2 align-items-center">
+            <label class="text-muted small me-2">Filter:</label>
+            <select class="form-select glass-input" style="width: 200px;"
+                    onchange="window.location.href='{{ url_for('admin.activity_logs') }}?type=' + this.value;">
+                <option value="">All Activities</option>
+                {% for atype in activity_types %}
+                <option value="{{ atype }}" {% if current_filter == atype %}selected{% endif %}>{{ atype }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="glass-card p-4">
+        {% if logs %}
+        <div class="table-responsive">
+            <table class="table table-dark table-hover table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Activity</th>
+                        <th>Description</th>
+                        <th>Student ID</th>
+                        <th>IP Address</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.id }}</td>
+                        <td>
+                            <span class="badge bg-{% if log.activity_type == 'violation' or log.activity_type == 'warning' %}danger{% elif log.activity_type == 'login' %}success{% elif log.activity_type in ['exam_start', 'exam_submit'] %}info{% elif log.activity_type == 'logout' %}secondary{% elif log.activity_type == 'exam_terminated' %}danger{% else %}accent{% endif %}">
+                                {{ log.activity_type }}
+                            </span>
+                        </td>
+                        <td class="small">{{ log.description or '—' }}</td>
+                        <td>{{ log.student_id or '—' }}</td>
+                        <td class="small text-muted">{{ log.ip_address or '—' }}</td>
+                        <td class="small text-muted">{{ log.timestamp.strftime('%d %b %Y, %I:%M:%S %p') if log.timestamp else '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if pagination.pages > 1 %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin.activity_logs', page=pagination.prev_num, type=current_filter) }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if p %}
+                <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin.activity_logs', page=p, type=current_filter) }}">{{ p }}</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+                {% endfor %}
+                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin.activity_logs', page=pagination.next_num, type=current_filter) }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-journal display-3"></i>
+            <p class="mt-2">No activity logs{% if current_filter %} for "{{ current_filter }}"{% endif %}.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

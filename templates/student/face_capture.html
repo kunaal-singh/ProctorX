@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Face Registration — AI Exam Proctor{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="glass-card p-5">
+                <div class="text-center mb-4">
+                    <i class="bi bi-camera-fill display-3 text-accent"></i>
+                    <h3 class="fw-bold mt-2">Face Registration</h3>
+                    <p class="text-muted">Position your face in the center and capture a clear photo</p>
+                </div>
+
+                <!-- Camera Feed -->
+                <div class="camera-container mb-4 position-relative">
+                    <video id="cameraFeed" autoplay playsinline class="w-100 rounded-3"></video>
+                    <canvas id="captureCanvas" style="display:none;"></canvas>
+                    <div class="face-guide-overlay">
+                        <div class="face-guide-circle"></div>
+                    </div>
+                </div>
+
+                <!-- Captured Preview -->
+                <div id="capturedPreview" class="text-center mb-4" style="display: none;">
+                    <img id="capturedImage" class="rounded-3 border border-accent" style="max-width: 320px;">
+                </div>
+
+                <!-- Controls -->
+                <div class="d-flex justify-content-center gap-3 flex-wrap" id="cameraControls">
+                    <button id="btnStartCamera" class="btn btn-accent btn-lg rounded-pill px-4" onclick="startCamera()">
+                        <i class="bi bi-camera-video me-2"></i>Start Camera
+                    </button>
+                    <button id="btnCapture" class="btn btn-success btn-lg rounded-pill px-4" style="display:none;" onclick="capturePhoto()">
+                        <i class="bi bi-camera me-2"></i>Capture Photo
+                    </button>
+                    <button id="btnRetake" class="btn btn-warning btn-lg rounded-pill px-4" style="display:none;" onclick="retakePhoto()">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Retake
+                    </button>
+                    <button id="btnSave" class="btn btn-accent btn-lg rounded-pill px-4" style="display:none;" onclick="saveFace()">
+                        <i class="bi bi-check-circle me-2"></i>Register Face
+                    </button>
+                </div>
+
+                <!-- Status -->
+                <div id="faceStatus" class="text-center mt-4" style="display: none;">
+                    <div class="spinner-border text-accent" role="status">
+                        <span class="visually-hidden">Processing...</span>
+                    </div>
+                    <p class="text-muted mt-2" id="statusText">Processing face encoding...</p>
+                </div>
+
+                <!-- Instructions -->
+                <div class="mt-4 p-3 rounded-3" style="background: rgba(108, 92, 231, 0.1);">
+                    <h6 class="fw-bold text-accent"><i class="bi bi-lightbulb me-1"></i>Tips for best results:</h6>
+                    <ul class="text-muted small mb-0">
+                        <li>Ensure good lighting on your face</li>
+                        <li>Face the camera directly — no angles</li>
+                        <li>Remove sunglasses or heavy accessories</li>
+                        <li>Only your face should be visible</li>
+                        <li>Keep a neutral expression</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/face_capture.js') }}"></script>
+{% endblock %}

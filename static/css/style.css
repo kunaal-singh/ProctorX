@@ -1,0 +1,510 @@
+/* ========================================
+   AI-Based Examination Proctoring System
+   Complete Dark Theme with Glassmorphism
+   ======================================== */
+
+/* ── CSS Variables ── */
+:root {
+    --accent: #6C5CE7;
+    --accent-hover: #5A4BD1;
+    --accent-subtle: rgba(108, 92, 231, 0.15);
+    --bg-dark: #0F0F1A;
+    --bg-card: rgba(25, 25, 45, 0.75);
+    --bg-card-solid: #191930;
+    --glass-bg: rgba(30, 30, 55, 0.6);
+    --glass-border: rgba(108, 92, 231, 0.2);
+    --text-primary: #E8E8F0;
+    --text-muted: #8B8BA3;
+    --success: #00B894;
+    --danger: #D63031;
+    --warning: #FDCB6E;
+    --info: #0984E3;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ── Reset & Base ── */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font);
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(108, 92, 231, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(9, 132, 227, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(0, 184, 148, 0.05) 0%, transparent 50%);
+}
+
+/* ── Typography ── */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+}
+
+.text-accent { color: var(--accent) !important; }
+.bg-accent { background-color: var(--accent) !important; }
+.bg-accent-subtle { background-color: var(--accent-subtle) !important; }
+.btn-accent {
+    background: linear-gradient(135deg, var(--accent), #A29BFE);
+    border: none;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.btn-accent:hover {
+    background: linear-gradient(135deg, var(--accent-hover), #8B80F0);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
+    color: white;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, var(--accent), #A29BFE, var(--info));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.fw-800 { font-weight: 800; }
+
+/* ── Glass Cards ── */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.glass-card:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Glass Navigation ── */
+.glass-nav {
+    background: rgba(15, 15, 26, 0.95) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 1050 !important;
+}
+.glass-nav .nav-link,
+.glass-nav .navbar-brand {
+    position: relative;
+    z-index: 1051;
+    pointer-events: auto;
+    cursor: pointer;
+}
+.glass-nav .nav-link:hover {
+    color: var(--accent) !important;
+    transition: color 0.2s ease;
+}
+
+/* ── Glass Footer ── */
+.glass-footer {
+    background: rgba(15, 15, 26, 0.6);
+    border-top: 1px solid var(--border-color);
+}
+
+/* ── Glass Alerts ── */
+.glass-alert {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+}
+
+/* ── Glass Modal ── */
+.glass-modal {
+    background: var(--bg-card-solid) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* ── Glass Input ── */
+.glass-input {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+    border-radius: 10px !important;
+    transition: all 0.3s ease;
+}
+.glass-input:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px var(--accent-subtle) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+.glass-input::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* ── Auth Card ── */
+.auth-card {
+    animation: slideUp 0.5s ease-out;
+}
+.auth-icon {
+    width: 100px;
+    height: 100px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--accent-subtle);
+}
+
+/* ── Hero Section ── */
+.hero-section {
+    position: relative;
+    padding: 120px 0 80px;
+    min-height: 85vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 30% 40%, rgba(108, 92, 231, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 70% 60%, rgba(9, 132, 227, 0.1) 0%, transparent 50%);
+}
+.hero-title {
+    line-height: 1.15;
+}
+.hero-badge .badge {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* ── Hero Particles ── */
+.hero-particles {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: floatParticle 15s infinite ease-in-out;
+}
+.p1 { width: 300px; height: 300px; background: var(--accent); top: 10%; left: -5%; animation-delay: 0s; }
+.p2 { width: 200px; height: 200px; background: var(--info); bottom: 20%; right: -3%; animation-delay: -3s; }
+.p3 { width: 150px; height: 150px; background: var(--success); top: 50%; left: 40%; animation-delay: -6s; }
+.p4 { width: 100px; height: 100px; background: var(--warning); top: 20%; right: 20%; animation-delay: -9s; }
+.p5 { width: 80px; height: 80px; background: var(--danger); bottom: 30%; left: 20%; animation-delay: -12s; }
+
+/* ── Feature Cards ── */
+.feature-card {
+    transition: all 0.3s ease;
+    cursor: default;
+}
+.feature-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--accent);
+}
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    background: var(--accent-subtle);
+}
+
+/* ── Stat Card ── */
+.stat-card {
+    transition: all 0.3s ease;
+}
+.stat-card:hover {
+    transform: translateY(-4px);
+}
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 1.2rem;
+}
+
+/* ── Activity List ── */
+.activity-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ── Camera Container ── */
+.camera-container {
+    max-width: 640px;
+    margin: 0 auto;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 2px solid var(--glass-border);
+    background: #000;
+}
+.camera-container video {
+    display: block;
+}
+.camera-container-sm {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid var(--glass-border);
+    background: #000;
+}
+.camera-container-sm video {
+    display: block;
+    width: 100%;
+}
+
+/* ── Face Guide Overlay ── */
+.face-guide-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+.face-guide-circle {
+    width: 220px;
+    height: 280px;
+    border: 3px dashed var(--accent);
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: pulseGuide 2s infinite;
+}
+
+/* ── Camera Status Dot ── */
+.camera-status-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    animation: blink 1.5s infinite;
+}
+
+/* ── Exam Question Card ── */
+.question-card {
+    animation: fadeIn 0.3s ease;
+}
+
+/* ── Options List ── */
+.option-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.option-item:hover {
+    border-color: var(--accent);
+    background: var(--accent-subtle);
+}
+.option-item:has(.option-radio:checked) {
+    border-color: var(--accent);
+    background: var(--accent-subtle);
+    box-shadow: 0 0 0 2px var(--accent-subtle);
+}
+.option-radio {
+    display: none;
+}
+.option-label {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: var(--accent-subtle);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+.option-item:has(.option-radio:checked) .option-label {
+    background: var(--accent);
+    color: white;
+}
+.option-text {
+    font-size: 0.95rem;
+}
+
+/* ── Question Navigator Grid ── */
+.question-nav-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+}
+.q-nav-btn {
+    width: 100%;
+    aspect-ratio: 1;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.q-nav-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+.q-nav-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+.q-nav-btn.answered {
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
+}
+.q-legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+/* ── Progress Bar ── */
+.progress {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* ── Table Styles ── */
+.table-dark {
+    --bs-table-bg: transparent;
+    --bs-table-border-color: var(--border-color);
+}
+.table-dark thead th {
+    background: rgba(108, 92, 231, 0.15);
+    border-bottom: 2px solid var(--accent);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.table-hover > tbody > tr:hover {
+    background: rgba(108, 92, 231, 0.08);
+}
+
+/* ── Pagination ── */
+.page-link {
+    background: var(--glass-bg);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+.page-link:hover {
+    background: var(--accent-subtle);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+.page-item.active .page-link {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+/* ── Form Overrides ── */
+.form-select {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+.form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+/* ── Main Content ── */
+.main-content {
+    min-height: calc(100vh - 140px);
+}
+
+/* ── Animations ── */
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes floatParticle {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.15; }
+    33% { transform: translate(30px, -30px) scale(1.05); opacity: 0.25; }
+    66% { transform: translate(-20px, 20px) scale(0.95); opacity: 0.2; }
+}
+@keyframes pulseGuide {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.03); }
+}
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 100px 0 60px;
+        min-height: auto;
+    }
+    .hero-title {
+        font-size: 2rem;
+    }
+    .face-guide-circle {
+        width: 160px;
+        height: 200px;
+    }
+    .question-nav-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(108, 92, 231, 0.3);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(108, 92, 231, 0.5);
+}
+
+/* ── Selection ── */
+::selection {
+    background: var(--accent);
+    color: white;
+}

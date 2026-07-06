@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — AI Exam Proctor{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <h3 class="fw-bold mb-4">
+        <i class="bi bi-speedometer2 me-2 text-accent"></i>Admin Dashboard
+    </h3>
+
+    <!-- Stats Grid -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-2">
+            <div class="glass-card p-4 stat-card text-center">
+                <i class="bi bi-people-fill display-5 text-accent mb-2"></i>
+                <h3 class="fw-bold mb-0">{{ total_students }}</h3>
+                <small class="text-muted">Total Students</small>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="glass-card p-4 stat-card text-center">
+                <i class="bi bi-person-check-fill display-5 text-success mb-2"></i>
+                <h3 class="fw-bold mb-0">{{ active_students }}</h3>
+                <small class="text-muted">Active Students</small>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="glass-card p-4 stat-card text-center">
+                <i class="bi bi-exclamation-triangle-fill display-5 text-danger mb-2"></i>
+                <h3 class="fw-bold mb-0">{{ total_violations }}</h3>
+                <small class="text-muted">Violations</small>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="glass-card p-4 stat-card text-center">
+                <i class="bi bi-file-earmark-pdf-fill display-5 text-info mb-2"></i>
+                <h3 class="fw-bold mb-0">{{ total_reports }}</h3>
+                <small class="text-muted">Reports</small>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="glass-card p-4 stat-card text-center">
+                <i class="bi bi-journal-text display-5 text-warning mb-2"></i>
+                <h3 class="fw-bold mb-0">{{ total_exams }}</h3>
+                <small class="text-muted">Exams</small>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="glass-card p-4 stat-card text-center">
+                <i class="bi bi-activity display-5 text-accent mb-2"></i>
+                <h3 class="fw-bold mb-0">{{ total_activities }}</h3>
+                <small class="text-muted">Activities</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Violation by Type -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-pie-chart me-2 text-danger"></i>Violations by Type
+                </h5>
+                {% if violation_stats.by_type %}
+                <canvas id="violationTypeChart" height="250"></canvas>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-bar-chart display-4"></i>
+                    <p class="mt-2">No violation data yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Top Violators -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-person-exclamation me-2 text-warning"></i>Top Violators
+                </h5>
+                {% if top_violators %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead>
+                            <tr><th>Student</th><th>ID</th><th>Violations</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for name, sid, count in top_violators %}
+                            <tr>
+                                <td>{{ name }}</td>
+                                <td><span class="text-accent">{{ sid }}</span></td>
+                                <td><span class="badge bg-danger">{{ count }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-check-circle display-4 text-success"></i>
+                    <p class="mt-2">No violations recorded.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-clock-history me-2 text-info"></i>Recent Activity
+                </h5>
+                {% if recent_activities %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover table-sm mb-0">
+                        <thead>
+                            <tr><th>Activity</th><th>Description</th><th>Student</th><th>IP</th><th>Time</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for log in recent_activities %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-{% if log.activity_type == 'violation' %}danger{% elif log.activity_type == 'login' %}success{% elif log.activity_type == 'exam_start' %}info{% else %}secondary{% endif %}">
+                                        {{ log.activity_type }}
+                                    </span>
+                                </td>
+                                <td class="small">{{ log.description or '—' }}</td>
+                                <td>{{ log.student_id or '—' }}</td>
+                                <td class="small text-muted">{{ log.ip_address or '—' }}</td>
+                                <td class="small text-muted">{{ log.timestamp.strftime('%d %b, %I:%M %p') if log.timestamp else '—' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-3">No activity logs yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+{% if violation_stats.by_type %}
+const vTypeData = {{ violation_stats.by_type | tojson }};
+renderViolationTypeChart(vTypeData);
+{% endif %}
+</script>
+{% endblock %}
