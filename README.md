@@ -14,6 +14,25 @@ ProctorX is an AI-powered online examination proctoring system that authenticate
 - MCQ-based Exam with Timer
 - Live Webcam Proctoring
 
+  ###Screenshots
+<img width="1915" height="911" alt="Image" src="https://github.com/user-attachments/assets/0cdd6a75-eef0-469a-ae6e-286a7434b665" />
+
+<img width="1917" height="921" alt="Image" src="https://github.com/user-attachments/assets/b5d17805-dc1b-4ffe-a028-6f84ad68bafc" />
+
+<img width="1917" height="918" alt="Image" src="https://github.com/user-attachments/assets/cf0ce2a6-858f-43be-8673-09c770234d08" />
+
+<img width="1917" height="911" alt="Image" src="https://github.com/user-attachments/assets/f7ad6fd3-5a62-4979-9977-54accfe14d7d" />
+
+<img width="1917" height="962" alt="Image" src="https://github.com/user-attachments/assets/a46d443c-2752-44cb-9399-b56dcf7b3477" />
+
+<img width="1912" height="950" alt="Image" src="https://github.com/user-attachments/assets/a2056c52-8f12-4a85-960e-87f5e53b490a" />
+
+<img width="1917" height="960" alt="Image" src="https://github.com/user-attachments/assets/c8ea759a-fe33-4380-86cc-54bffe6f8e52" />
+
+<img width="1917" height="958" alt="Image" src="https://github.com/user-attachments/assets/9c1df838-ca5f-42e5-89b1-f601c48287c4" />
+
+<img width="1917" height="947" alt="Image" src="https://github.com/user-attachments/assets/6c22d918-b541-4a69-9ada-fc92051e69cf" />
+
 ### Exam Monitoring (Real-time AI)
 - **Face Detection** — Haar Cascade + MediaPipe
 - **Face Recognition** — dlib-based identity verification
@@ -195,6 +214,7 @@ Edit `config.py` to customize:
 | Auth | Flask Sessions, Werkzeug Password Hashing |
 
 ---
+
 
 ## 📄 License
 
